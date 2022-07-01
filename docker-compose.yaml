@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  app:
+    container_name: unity_game_service
+    depends_on:
+      - db
+      - integration-test-db
+    build: .
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    stdin_open: true
+    tty: true
+    networks:
+      - default
+
+  db:
+    container_name: unity_game_service_db
+    image: postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./db_data/init_db.sql:/docker-entrypoint-initdb.d/init_db.sql
+    env_file: ./.env
+    environment:
+      POSTGRES_PASSWORD: $DB_PASSWORD
+      POSTGRES_USER: $DB_USER
+      POSTGRES_DB: $DB_DATABASE
+
+  integration-test-db:
+    container_name: unity_game_service_integration_test_db
+    image: postgres
+    restart: unless-stopped
+    ports:
+      - "5431:5432"
+    volumes:
+      - ./db_data/init_integration_test_db.sql:/docker-entrypoint-initdb.d/init_integration_test_db.sql
+    env_file: ./.env
+    environment:
+      POSTGRES_PASSWORD: $DB_PASSWORD
+      POSTGRES_USER: $DB_USER
+      POSTGRES_DB: $TEST_DB_DATABASE
+
